@@ -1,0 +1,47 @@
+spring:
+  application:
+    name: switch-service
+  datasource:
+    url: jdbc:h2:mem:switchdb;DB_CLOSE_DELAY=-1
+    username: sa
+    password: ""
+  jpa:
+    open-in-view: false        # no DB session held open while waiting on banks
+    hibernate:
+      ddl-auto: update
+
+server:
+  port: 8080
+
+switch:
+  bank:
+    base-url: http://localhost:9090
+    connect-timeout-millis: 1000
+    read-timeout-millis: 2000
+    max-retries: 2
+    backoff-millis: 200
+  sweeper:
+    enabled: true
+    interval-millis: 5000
+    stuck-after-seconds: 15
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+
+---
+# Activated by docker compose (SPRING_PROFILES_ACTIVE=postgres)
+spring:
+  config:
+    activate:
+      on-profile: postgres
+  datasource:
+    url: jdbc:postgresql://postgres:5432/switchdb
+    username: switch
+    password: switch
+
+switch:
+  bank:
+    base-url: http://bank-simulator:9090
